@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Método Indica — Cartão de Todos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --purple-deep:#3D2952;
+    --purple-mid:#6B4A85;
+    --purple-pale:#EFE6F2;
+    --coral:#FF6F5E;
+    --coral-soft:#FFDCD3;
+    --paper:#F8F3F6;
+    --ink:#241B2E;
+    --ink-soft:#6B5F73;
+    --line:#E3D7E6;
+    --white:#FFFFFF;
+    --radius-card:14px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.5;}
+  h1,h2,h3,.serif{font-family:'DM Serif Display',serif;font-weight:400;}
+  a{color:inherit;}
+  button{font-family:'DM Sans',sans-serif;}
+
+  /* Top bar */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(20px,4vw,56px);
+    border-bottom:1px solid var(--line);
+    background:var(--white);
+    position:sticky;top:0;z-index:20;
+    flex-wrap:wrap;gap:14px;
+  }
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:9px;
+    background:linear-gradient(135deg,var(--purple-deep),var(--coral));
+    display:inline-block;flex:none;
+  }
+  .brand h1{font-size:1.35rem;margin:0;color:var(--purple-deep);}
+  .brand span{font-size:.78rem;color:var(--ink-soft);display:block;margin-top:-2px;}
+
+  .audience-toggle{
+    display:flex;background:var(--purple-pale);border-radius:999px;padding:4px;gap:2px;
+  }
+  .audience-toggle button{
+    border:none;background:transparent;padding:9px 20px;border-radius:999px;
+    font-weight:600;font-size:.88rem;color:var(--purple-deep);
+    cursor:pointer;transition:background .2s ease,color .2s ease;
+  }
+  .audience-toggle button.active{background:var(--purple-deep);color:#fff;}
+
+  /* Overall progress */
+  .overall{
+    max-width:760px;margin:0 auto;padding:20px clamp(20px,4vw,0) 0;
+  }
+  .overall-meta{
+    display:flex;justify-content:space-between;font-size:.82rem;color:var(--ink-soft);
+    margin-bottom:8px;padding:0 clamp(20px,4vw,0);
+  }
+  .overall-bar{
+    height:6px;background:var(--purple-pale);border-radius:999px;overflow:hidden;
+    margin:0 clamp(20px,4vw,0);
+  }
+  .overall-fill{height:100%;background:linear-gradient(90deg,var(--purple-deep),var(--coral));width:0%;transition:width .4s ease;}
+
+  /* Player */
+  .player-wrap{max-width:760px;margin:0 auto;padding:28px clamp(20px,4vw,0) 90px;}
+  .player{
+    background:var(--white);border:1px solid var(--line);border-radius:20px;
+    padding:clamp(24px,4vw,44px);
+    animation:fadeIn .35s ease;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .lesson-eyebrow{
+    font-size:.8rem;color:var(--coral);font-weight:700;margin:0 0 6px;
+  }
+  .lesson-title{
+    font-size:clamp(1.6rem,3vw,2.15rem);color:var(--purple-deep);margin:0 0 24px;line-height:1.2;
+  }
+  .theory p{margin:0 0 14px;color:var(--ink);font-size:1.02rem;}
+  .theory ul{margin:0 0 14px;padding-left:22px;color:var(--ink);}
+  .theory li{margin-bottom:8px;}
+  .script{
+    background:var(--purple-pale);border-left:3px solid var(--purple-mid);
+    padding:14px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:.95rem;color:var(--ink);
+  }
+  .script strong{color:var(--purple-deep);}
+  .math{
+    display:flex;gap:24px;flex-wrap:wrap;background:var(--ink);color:#fff;
+    border-radius:10px;padding:16px 20px;margin:14px 0;
+  }
+  .math div{font-size:.82rem;color:#C9BED0;}
+  .math strong{display:block;font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--coral-soft);font-weight:400;}
+  .tag-chip{
+    display:inline-block;background:var(--coral-soft);color:var(--purple-deep);
+    padding:4px 12px;border-radius:999px;font-size:.82rem;font-weight:600;margin:3px 6px 3px 0;
+  }
+
+  .exercise{
+    margin-top:28px;background:var(--paper);border:1px solid var(--coral-soft);
+    border-radius:14px;padding:22px clamp(18px,3vw,26px);
+  }
+  .exercise-label{font-size:.8rem;font-weight:700;color:var(--coral);margin:0 0 10px;}
+  .exercise-prompt{margin:0 0 12px;color:var(--ink);font-size:1rem;}
+  .exercise-input{
+    width:100%;min-height:90px;resize:vertical;
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+    font-family:'DM Sans',sans-serif;font-size:.95rem;color:var(--ink);
+    background:#fff;
+  }
+  .exercise-input:focus{outline:2px solid var(--purple-mid);outline-offset:1px;}
+  .exercise-status{
+    display:block;margin-top:8px;font-size:.8rem;color:var(--ink-soft);min-height:16px;
+  }
+  .exercise-status.saved{color:var(--purple-mid);}
+
+  .player-actions{
+    display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;flex-wrap:wrap;
+  }
+  .btn-prev{
+    border:none;background:transparent;color:var(--ink-soft);font-size:.92rem;
+    cursor:pointer;padding:12px 6px;font-weight:600;
+  }
+  .btn-prev:disabled{opacity:0;pointer-events:none;}
+  .btn-next{
+    border:none;background:var(--purple-deep);color:#fff;font-size:.95rem;font-weight:700;
+    padding:14px 28px;border-radius:999px;cursor:pointer;transition:background .2s ease,transform .15s ease;
+  }
+  .btn-next:hover{background:var(--coral);}
+  .btn-next:active{transform:scale(.98);}
+  .btn-next.btn-disabled{background:var(--line);color:var(--ink-soft);cursor:not-allowed;}
+  .btn-next.btn-disabled:hover{background:var(--line);}
+  .answer-hint{color:var(--coral);font-size:.85rem;text-align:right;margin:10px 0 0;}
+
+  /* Cover */
+  .cover{
+    max-width:600px;margin:40px auto;text-align:center;
+    background:var(--white);border:1px solid var(--line);border-radius:20px;
+    padding:clamp(32px,6vw,56px) clamp(24px,5vw,44px);
+    animation:fadeIn .35s ease;
+  }
+  .cover-eyebrow{font-size:.82rem;font-weight:700;color:var(--coral);margin:0 0 10px;}
+  .cover-title{font-size:clamp(1.7rem,3.4vw,2.3rem);color:var(--purple-deep);margin:0 0 14px;line-height:1.2;}
+  .cover-sub{color:var(--ink-soft);margin:0 auto 18px;max-width:46ch;font-size:1rem;}
+  .cover-progress-note{color:var(--purple-mid);font-weight:600;font-size:.92rem;margin:0 0 20px;}
+  .cover-actions{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:10px;}
+  .cover-restart{color:var(--ink-soft);}
+  .cover-link-btn{
+    display:block;margin:14px auto 0;border:none;background:transparent;color:var(--purple-mid);
+    font-weight:600;font-size:.88rem;cursor:pointer;text-decoration:underline;
+  }
+
+  /* Quiz */
+  .quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:6px;}
+  .quiz-option{
+    text-align:left;border:1px solid var(--line);background:#fff;border-radius:10px;
+    padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:.94rem;color:var(--ink);
+    cursor:pointer;transition:border-color .15s ease,background .15s ease;
+  }
+  .quiz-option:hover:not(:disabled){border-color:var(--purple-mid);background:var(--purple-pale);}
+  .quiz-option:disabled{cursor:default;}
+  .quiz-option.correct-reveal{border-color:var(--purple-mid);background:var(--purple-pale);font-weight:700;color:var(--purple-deep);}
+  .quiz-option.incorrect-reveal{border-color:var(--coral);background:var(--coral-soft);color:var(--purple-deep);}
+  .quiz-feedback{margin-top:12px;font-size:.9rem;color:var(--ink);background:var(--paper);border-radius:8px;padding:12px 14px;}
+
+  .jump-toggle{
+    text-align:center;margin-top:22px;
+  }
+  .jump-toggle button{
+    border:none;background:transparent;color:var(--ink-soft);font-size:.82rem;
+    cursor:pointer;text-decoration:underline;
+  }
+  .jump-list{display:none;max-width:760px;margin:14px auto 0;padding:0 clamp(20px,4vw,0);}
+  .jump-list.open{display:block;}
+  .jump-block-title{font-size:.85rem;font-weight:700;color:var(--purple-deep);margin:16px 0 8px;}
+  .jump-item{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;
+    font-size:.9rem;color:var(--ink);
+  }
+  .jump-item:hover{background:var(--purple-pale);}
+  .jump-item.current{background:var(--purple-pale);font-weight:700;}
+  .jump-dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none;}
+  .jump-dot.done{background:var(--coral);}
+
+  .completion{
+    text-align:center;padding:60px clamp(24px,5vw,44px);
+    background:var(--white);border:1px solid var(--line);border-radius:20px;
+  }
+  .completion h3{font-size:1.8rem;color:var(--purple-deep);margin:0 0 12px;}
+  .completion p{color:var(--ink-soft);margin:0 0 24px;}
+  .completion button{
+    border:none;background:var(--purple-deep);color:#fff;font-weight:700;
+    padding:13px 26px;border-radius:999px;cursor:pointer;
+  }
+
+  @media (max-width:600px){
+    .player{border-radius:14px;}
+    .player-actions{flex-direction:column-reverse;align-items:stretch;}
+    .btn-next{width:100%;text-align:center;}
+    .btn-prev{text-align:center;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="mark"></span>
+    <div>
+      <h1>Método Indica</h1>
+      <span>Método Viviane Rodrigues — Cartão de Todos</span>
+    </div>
+  </div>
+  <div class="audience-toggle">
+    <button data-audience="vendedores" class="active">Vendedores</button>
+    <button data-audience="recepcao">Recepção</button>
+  </div>
+</div>
+
+<div class="overall">
+  <div class="overall-meta">
+    <span id="overall-label">Aula 1 de 17</span>
+    <span id="overall-pct">0%</span>
+  </div>
+  <div class="overall-bar"><div class="overall-fill" id="overall-fill"></div></div>
+</div>
+
+<div class="player-wrap" id="player-wrap"></div>
+
+<div class="jump-toggle">
+  <button id="jump-toggle-btn">Ver todas as aulas</button>
+</div>
+<div class="jump-list" id="jump-list"></div>
+
+<script>
+const DATA = {
+  vendedores: {
+    hero: {
+      title: "Quem já é cliente vira sua melhor equipe de vendas",
+      sub: "Indicação e venda online não competem com o presencial — são o que te faz vender enquanto você dorme. Aqui está o passo a passo pra transformar cada cadastro em mais três.",
+      stat: { big: "Uma régua acima", text: "Investir em indicação ajuda a somar volume — presencial, leads e indicação juntos — até a régua que paga mais por venda." }
+    },
+    blocks: [
+      {
+        id: "b1", title: "Por que Indicação Vende Mais", sub: "O cliente indicado já chega confiando em você — o trabalho de convencer já foi feito.",
+        lessons: [
+          { id:"b1l1", title:"Confiança que já vem pronta", body:`
+            <p>Quando alguém compra de você por conta própria, ainda precisa se convencer de que pode confiar. Quando é indicado por um amigo ou parente, essa confiança já veio pronta — você começa a conversa num degrau muito mais alto.</p>
+            <p>Isso muda o tipo de objeção que você recebe: menos "quem é você" e mais "como funciona".</p>
+          `, exercise:{type:'reflexao', prompt:"Pense num cliente satisfeito recente. O que ele disse ou fez que mostrou essa confiança? Escreva aqui pra lembrar na próxima vez que for pedir indicação a ele."} },
+          { id:"b1l2", title:"Custo de aquisição menor", body:`
+            <p>Toda venda tem um custo por trás — tempo de abordagem, deslocamento, ligações, tentativas que não fecham. Na indicação, o cliente satisfeito já filtrou o lead pra você: ele só indicou porque acha que vale a pena.</p>
+            <p>Isso significa menos esforço pra fechar o mesmo resultado.</p>
+          `, exercise:{type:'reflexao', prompt:"Quantas indicações você recebeu no último mês sem pedir? Anote o número — é o seu ponto de partida."} },
+          { id:"b1l3", title:"O momento certo de pedir", body:`
+            <p>O erro mais comum é pedir indicação só no fechamento, como um adendo apressado. Existem pelo menos três momentos melhores:</p>
+            <ul>
+              <li>Quando o cliente demonstra satisfação espontânea (elogia o atendimento, agradece)</li>
+              <li>Quando ele usa o benefício pela primeira vez e comenta o resultado</li>
+              <li>Num contato de pós-venda, semanas depois, quando a experiência já está consolidada</li>
+            </ul>
+            <p>Pedir no momento certo pesa mais do que pedir com frequência.</p>
+          `, exercise:{type:'quiz', prompt:"Um cliente comenta, sem você perguntar nada, que ficou muito satisfeito com o atendimento. Qual é a melhor atitude?", options:["Aproveitar o momento e já pedir a indicação ali mesmo","Anotar mentalmente e pedir só no próximo fechamento","Não comentar nada, esperando o cliente indicar sozinho"], correct:0, explanation:"Elogio espontâneo é um dos melhores momentos pra pedir indicação — a satisfação está fresca e o cliente já demonstrou isso sozinho."} },
+        ]
+      },
+      {
+        id:"b2", title:"Mentalidade de Investimento", sub:"Vendedor de elite não vê bonificação como custo — vê como o que faz a indicação fechar.",
+        lessons:[
+          { id:"b2l1", title:"A conta que muda tudo", body:`
+            <p>Um vendedor comum vê R$100 saindo do próprio bolso pra bonificar indicação e pensa em gasto. Um vendedor de elite enxerga isso como investimento — porque olha pro conjunto, não pra indicação isolada.</p>
+            <div class="math">
+              <div>Investimento mensal<br><strong>R$100</strong></div>
+              <div>Indicações que ele gera<br><strong>Várias</strong></div>
+              <div>Resultado<br><strong>Régua acima</strong></div>
+            </div>
+            <p>Esse investimento não fecha uma venda sozinho — ele soma. As indicações que ele gera entram junto com as vendas presenciais e os leads que você já trabalha, e é esse conjunto que te leva até a régua de volume que paga mais por venda fechada (por exemplo, bater 70 vendas no mês). O ganho não está numa indicação isolada — está em cada indicação te aproximar da régua seguinte.</p>
+            <p>A empresa já entra com uma parte (o cashback de R$10 a R$15 por indicação fechada). O que você soma por cima é o que faz a indicação sair do papel.</p>
+          `, exercise:{type:'reflexao', prompt:"Somando presencial, leads e indicação, quantas vendas você fecha hoje por mês? Quantas faltam pra você chegar na próxima régua de pagamento — e quantas dessas podem vir de indicação bonificada?"} },
+          { id:"b2l2", title:"A empresa já te dá a largada", body:`
+            <p>O Cartão de Todos já disponibiliza leads e listas de contato pra trabalhar. Isso não é o ponto de chegada — é o ponto de partida. Vendedor de elite não espera só isso: reinveste no que já veio de graça pra multiplicar o resultado.</p>
+            <p>O mesmo raciocínio vale pra ferramenta: quem investe em WhatsApp Business com API de disparo, ou em anúncio no Meta, sem esperar iniciativa da empresa, entende uma coisa simples — quem embolsa o fruto da venda é ele, não a empresa.</p>
+          `, exercise:{type:'reflexao', prompt:"Você já trabalhou os leads que a empresa disponibilizou esse mês? Anote quantos contatos ainda estão parados."} },
+          { id:"b2l3", title:"Menu de bonificação além do cashback", body:`
+            <p>O cashback oficial (R$10–15) é o incentivo padrão. O que separa quem indica pouco de quem indica muito costuma ser o que o vendedor soma por conta própria. Alguns exemplos que funcionam bem, com investimento baixo e impacto alto:</p>
+            <span class="tag-chip">Consulta com ginecologista</span>
+            <span class="tag-chip">Consulta com ortopedista</span>
+            <span class="tag-chip">Açaí na sorveteria parceira</span>
+            <span class="tag-chip">Almoço num restaurante parceiro</span>
+            <p style="margin-top:12px">A lógica: escolher algo que o cliente sinta como cuidado pessoal, não como "brinde de propaganda".</p>
+          `, exercise:{type:'reflexao', prompt:"Escolha uma bonificação (da lista ou sua) que combina com o perfil dos seus clientes. Qual você vai testar primeiro?"} },
+          { id:"b2l4", title:"Como pedir sem parecer chato", body:`
+            <div class="script"><strong>Presencial, logo após o cadastro:</strong> "Seja bem-vindo(a) ao Cartão de Todos, [nome]! Deu certo o seu cadastro. Vou validar tudo agora, e a confirmação já chega no seu WhatsApp. Enquanto isso, deixa eu já te colocar na Promoção dos Amigos: todo amigo ou familiar que você perceber que precisa de consulta ou exame, me manda o contato. A pessoa pode fechar o cadastro aqui comigo no escritório ou pelo meu WhatsApp — e como agora você já me conhece, pode falar pra ela que sou de confiança, sem dúvida nenhuma. A cada indicação que fechar, cai R$15 de cashback no seu aplicativo, sempre entre o dia 15 e o dia 30 do mês. E não para aí: a partir de 3 indicações fechadas no mês, você entra no sorteio que eu faço entre meus clientes no fim de cada mês — se for sorteado(a), escolhe o prêmio: açaí na sorveteria parceira, almoço no restaurante parceiro, ou consulta com ortopedista, ginecologista ou clínico geral. Tem alguém que você já quer indicar agora?"</div>
+            <div class="script"><strong>WhatsApp, semanas depois:</strong> "Oi [nome], tudo bem? Passando só pra saber se você já usou o cartão. Aproveito pra lembrar: se alguém da sua família ou do trabalho precisar, me manda o contato que eu cuido de tudo — e ainda tem uma bonificação pra você."</div>
+          `, exercise:{type:'quiz', prompt:"O cliente acabou de fechar o cadastro e está visivelmente satisfeito. Qual abordagem funciona melhor?", options:["Pedir a indicação já explicando a bonificação, no calor do momento","Deixar pra pedir só depois que ele já tiver usado o cartão algumas vezes","Pedir indicação sem mencionar nenhuma bonificação, pra não parecer interesseiro"], correct:0, explanation:"O momento logo após o fechamento, com a bonificação clara, é quando o pedido soa mais natural e tem mais força."} },
+        ]
+      },
+      {
+        id:"b3", title:"WhatsApp Business Organizado", sub:"O WhatsApp é sua ferramenta de trabalho — organizar ele é parte da venda, não um extra.",
+        lessons:[
+          { id:"b3l1", title:"Etiquetas que facilitam o dia a dia", body:`
+            <p>Use sempre o WhatsApp Business — as etiquetas só existem nele. Um conjunto simples que já resolve a maior parte da rotina:</p>
+            <span class="tag-chip">Cliente Ativo</span>
+            <span class="tag-chip">Indicação Pendente</span>
+            <span class="tag-chip">Aguardando Fechamento</span>
+            <span class="tag-chip">Aniversariante do Mês</span>
+            <span class="tag-chip">Precisa de Suporte</span>
+            <p style="margin-top:12px">Padronizar as mesmas etiquetas em toda a equipe ajuda até em caso de dúvida — qualquer pessoa consegue achar o cliente certo rapidamente.</p>
+          `, exercise:{type:'reflexao', prompt:"Quais etiquetas você já usa hoje no WhatsApp Business? O que ainda falta organizar?"} },
+          { id:"b3l2", title:"Salvar contato com nome e matrícula", body:`
+            <p>Ao salvar o cliente, inclua a matrícula do cadastro junto ao nome (ex: "Maria SC311065541"). Isso evita perda de tempo se ele precisar de suporte no futuro e você precisar localizar o cadastro rapidamente.</p>
+          `, exercise:{type:'reflexao', prompt:"Pegue os últimos 5 contatos que você salvou. Quantos têm a matrícula junto ao nome? Anote pra corrigir."} },
+          { id:"b3l3", title:"Status como conexão, não como anúncio", body:`
+            <p>O primeiro contato que o cliente teve com você — presencial ou online — foi o que fez ele confiar o suficiente pra se cadastrar. O status é onde essa conexão continua depois da venda.</p>
+            <p>Antes de pensar em divulgar o cartão, pense em ser uma pessoa que o cliente reconhece e gosta de acompanhar:</p>
+            <ul>
+              <li>Seu aniversário, um agradecimento pelos parabéns (mesmo que poucos tenham visto)</li>
+              <li>Memes de vendedor, de fim de mês — sempre respeitando todas as classes que estão te acompanhando, sem ofender ninguém</li>
+              <li>Bastidores do seu dia, sem precisar ser só sobre trabalho</li>
+            </ul>
+            <p>É dentro desse fluxo natural — não como post isolado — que entra o pedido de indicação, e ele funciona muito melhor assim.</p>
+          `, exercise:{type:'quiz', prompt:"Qual é o jeito mais eficaz de usar o status do WhatsApp pra gerar indicação?", options:["Postar só ofertas do cartão, todos os dias","Misturar conteúdo pessoal — aniversário, memes, bastidores — com o pedido de indicação de vez em quando","Nunca postar nada sobre o cartão, pra não incomodar"], correct:1, explanation:"A indicação funciona melhor quando vem dentro de uma conexão real com o cliente, não como anúncio isolado."} },
+        ]
+      },
+      {
+        id:"b4", title:"Fechando Venda à Distância", sub:"Venda online exige outro ritmo — a confiança precisa ser construída só com texto e áudio.",
+        lessons:[
+          { id:"b4l1", title:"Presencial x online: o que muda", body:`
+            <p>No presencial, sua presença já resolve boa parte da confiança. Online, cada palavra escrita precisa carregar esse peso sozinha. Isso pede mais paciência e menos pressa pra fechar.</p>
+          `, exercise:{type:'reflexao', prompt:"Qual foi a última venda online que você fez? O que foi mais difícil de transmitir só por texto?"} },
+          { id:"b4l2", title:"Tirando dúvida por texto e áudio", body:`
+            <p>Prefira áudios curtos pra explicar algo que teria muito texto — humaniza a conversa sem perder tempo. Reserve o texto pra confirmações, valores e links, onde a pessoa vai querer reler.</p>
+          `, exercise:{type:'reflexao', prompt:"Escreva um roteiro curto de áudio que você usaria pra explicar o cartão a um cliente novo."} },
+          { id:"b4l3", title:"Enviando o link de pagamento", body:`
+            <p>Envie o link só depois de o cliente confirmar entendimento — nunca como primeira resposta. Acompanhe de uma frase curta reforçando o que ele está resolvendo ao fechar, não só o valor.</p>
+          `, exercise:{type:'reflexao', prompt:"Pensando na próxima venda online, o que você vai confirmar antes de mandar o link de pagamento?"} },
+          { id:"b4l4", title:"Follow-up sem ser insistente", body:`
+            <p><strong>Follow-up</strong> é o acompanhamento que você faz depois do primeiro contato — quando o cliente ainda não respondeu ou não fechou. Em português seria algo como "retomar contato" ou "dar seguimento". A ideia não é cobrar, é manter a porta aberta sem deixar o cliente esquecido.</p>
+            <div class="script"><strong>1 dia depois, sem resposta:</strong> "Oi [nome], tudo bem? Passando aqui pra saber se ficou alguma dúvida sobre o cadastro — você ainda tem interesse em finalizar?"</div>
+            <div class="script"><strong>3-4 dias depois:</strong> "Oi [nome], separei uma condição especial pra você fechar: cadastro no débito com 50% de desconto na adesão — fica só R$33,40. É por tempo limitado, não queria que você perdesse. Vamos confirmar seu cadastro nessa condição?"</div>
+          `, exercise:{type:'quiz', prompt:"O cliente não responde há 4 dias. Qual mensagem tem mais chance de reengajar sem parecer chato?", options:["Cobrar diretamente, perguntando por que ele não respondeu","Oferecer uma condição especial por tempo limitado, sem soar como cobrança","Não mandar mais nada e esperar ele voltar a falar"], correct:1, explanation:"Uma oferta com prazo dá um motivo real pra resposta, sem parecer insistência."} },
+        ]
+      },
+      {
+        id:"b5", title:"Rotina e Métricas", sub:"O que não é medido, não repete. Uma rotina simples sustenta o resultado.",
+        lessons:[
+          { id:"b5l1", title:"Meta semanal de indicação", body:`<p>Defina um número mínimo de pedidos de indicação por semana — não de fechamentos, de pedidos. É a ação que você controla; o fechamento depende também do outro lado.</p>`, exercise:{type:'reflexao', prompt:"Qual vai ser sua meta de pedidos de indicação essa semana? Escreva o número."} },
+          { id:"b5l2", title:"Meta de leads online", body:`<p>Separe uma meta própria pra leads que vieram do WhatsApp/redes, diferente da indicação. São canais com ritmos diferentes e merecem acompanhamento separado.</p>`, exercise:{type:'reflexao', prompt:"Qual vai ser sua meta de leads online essa semana? Escreva o número."} },
+          { id:"b5l3", title:"Registro simples", body:`<p>Uma planilha ou as etiquetas do próprio WhatsApp já bastam. O importante é conseguir responder rápido: quantas indicações pedi essa semana, quantas fecharam, quantos leads online entraram.</p>`, exercise:{type:'reflexao', prompt:"Como você vai registrar isso — planilha, etiquetas, caderno? Escreva o método que vai usar a partir de agora."} },
+        ]
+      }
+    ]
+  },
+  recepcao: {
+    hero: {
+      title: "Cada pessoa que passa perto pode virar um cadastro",
+      sub: "Sem fluxo natural na porta, o trabalho da recepção é trazer as pessoas até aqui — com o motivo certo, no canal certo.",
+      stat: { big: "4 frentes", text: "Divulgação local, parcerias, ativação de leads e eventos — trabalhando juntas." }
+    },
+    blocks: [
+      {
+        id:"r1", title:"Divulgação em Grupos e Redes Locais", sub:"Ir até onde as pessoas do bairro já estão, em vez de esperar elas passarem na porta.",
+        lessons:[
+          { id:"r1l1", title:"Grupos de WhatsApp e Facebook", body:`<p>Poste em grupos de bairro e comunidade com um dia e horário fixo de atendimento presencial. Fixar uma rotina (ex: "toda quinta, cadastro rápido no escritório") cria previsibilidade — as pessoas passam a lembrar do dia certo.</p>`, exercise:{type:'quiz', prompt:"Qual prática ajuda mais a fazer as pessoas lembrarem do dia de atendimento presencial?", options:["Postar em horários e dias aleatórios, sem padrão","Fixar um dia e horário fixo, e repostar sempre no mesmo padrão","Postar só uma vez e não repetir"], correct:1, explanation:"Previsibilidade cria hábito — quando o dia é sempre o mesmo, as pessoas passam a esperar por ele."} },
+          { id:"r1l2", title:"Status mostrando o escritório por dentro", body:`<p>Quem nunca foi tem receio de não saber o que esperar. Mostrar o espaço, a equipe e o atendimento nos Stories reduz essa barreira antes mesmo da pessoa chegar.</p>`, exercise:{type:'reflexao', prompt:"O que você mostraria no status pra alguém que nunca veio ao escritório perder o receio de ir?"} },
+          { id:"r1l3", title:"Post fixo de convite", body:`<p>Um post simples com endereço, horário de funcionamento e o diferencial de ir pessoalmente (cadastro na hora, tira-dúvidas direto) — fixado e repostado periodicamente.</p>`, exercise:{type:'reflexao', prompt:"Escreva o texto do post fixo de convite que você usaria."} },
+        ]
+      },
+      {
+        id:"r2", title:"Parcerias com Comércio Vizinho", sub:"Negócios próximos já têm o público certo circulando — trocar indicação é mais rápido que atrair do zero.",
+        lessons:[
+          { id:"r2l1", title:"Quem procurar", body:`<p>Farmácias, salões e mercados perto do escritório são bons parceiros: público recorrente, relação de confiança já estabelecida, e disposição pra indicar em troca de você também indicar os clientes deles.</p>`, exercise:{type:'reflexao', prompt:"Quais comércios vizinhos você já pensou em procurar como parceiros? Liste 2 ou 3."} },
+        ]
+      },
+      {
+        id:"r3", title:"Ativação de Leads Existentes", sub:"Antes de buscar gente nova, converter quem já demonstrou interesse.",
+        lessons:[
+          { id:"r3l1", title:"Retomar contatos antigos", body:`<p>Ligar ou mandar mensagem pra leads que já passaram pela empresa, convidando pra resolver dúvidas presencialmente — é o público mais barato de reativar.</p>`, exercise:{type:'reflexao', prompt:"Quantos contatos você pretende ligar no decorrer do dia?"} },
+          { id:"r3l2", title:"Dar um motivo concreto", body:`<div class="script">"Oi [nome], vi que você chegou a se interessar pelo Cartão de Todos. Pode passar aqui no escritório com um documento que o cadastro sai na hora — sem complicação, e ainda ganha uma consulta gratuita com clínico geral."</div>`, exercise:{type:'quiz', prompt:"Ao retomar um lead antigo, qual abordagem tem mais chance de trazer ele até o escritório?", options:["Perguntar genericamente se ele ainda tem interesse","Dar um motivo concreto pra ida, com um benefício extra, como a consulta gratuita","Mandar só o link de cadastro online"], correct:1, explanation:"Motivo concreto + benefício claro reduz a hesitação de sair de casa."} },
+          { id:"r3l3", title:"Confirmar visita marcada", body:`<p>Quando um lead combinar de ir até o escritório, confirme um dia antes por mensagem. Isso reduz falta e mostra pra pessoa que alguém está de fato esperando por ela.</p>`, exercise:{type:'reflexao', prompt:"Pensando nos leads que já demonstraram interesse, que dia e horário você vai sugerir pra próxima visita marcada?"} },
+        ]
+      },
+      {
+        id:"r4", title:"Eventos e Motivos pra Ida Presencial", sub:"Criar um gatilho que só existe indo até lá.",
+        lessons:[
+          { id:"r4l1", title:"Dia de cadastro expresso", body:`<p>Um dia fixo na semana com um brinde pequeno pra quem for fazer o cadastro — por exemplo, um picolé na Sorvete Guri. Simples, baixo custo, mas cria uma data marcada na cabeça das pessoas e faz elas quererem levar um amigo junto nesse dia, pra ele também aproveitar e fazer o cadastro.</p>`, exercise:{type:'quiz', prompt:"O que faz o dia fixo de cadastro expresso funcionar melhor pra gerar novos leads com o tempo?", options:["Trocar o dia toda semana pra criar novidade","Manter sempre o mesmo dia fixo, criando hábito e vontade de levar um amigo","Fazer sem brinde nenhum, só pra economizar"], correct:1, explanation:"Consistência de dia + brinde simples é o que cria o hábito de vir — e de trazer alguém junto."} },
+          { id:"r4l2", title:"Condição exclusiva presencial", body:`<p>Uma vantagem que só existe pra quem cadastra no escritório naquele dia ou semana reforça o motivo de sair de casa em vez de fazer só online. A recepção pode divulgar isso no status do WhatsApp de cada uma e em publicações nos grupos de Facebook e no Marketplace.</p>`, exercise:{type:'reflexao', prompt:"Que condição exclusiva você imagina oferecer só pra quem for até o escritório?"} },
+          { id:"r4l3", title:"Ajuda com o aplicativo no ato", body:`<p>Muita gente hesita em usar o cartão porque não sabe mexer no aplicativo. Oferecer ajuda pra baixar e ativar tudo na hora, no escritório, é motivo suficiente pra muita gente preferir vir pessoalmente em vez de tentar sozinho em casa.</p>`, exercise:{type:'reflexao', prompt:"Quais são as dúvidas mais comuns sobre o aplicativo que você já pode antecipar pra ajudar quem for ao escritório?"} },
+        ]
+      }
+    ]
+  }
+};
+let currentAudience = 'vendedores';
+let currentFlatIndex = 0;
+let showCover = true;
+let progress = {};
+let respostas = {};
+let saveTimers = {};
+
+function flatLessons(audience){
+  const list = [];
+  DATA[audience].blocks.forEach(block => {
+    block.lessons.forEach(lesson => {
+      list.push({ block, lesson });
+    });
+  });
+  return list;
+}
+
+async function loadProgress(){
+  try{
+    const raw = localStorage.getItem('metodo-indica-progresso');
+    if(raw) progress = JSON.parse(raw);
+  }catch(e){ progress = {}; }
+  try{
+    const raw2 = localStorage.getItem('metodo-indica-respostas');
+    if(raw2) respostas = JSON.parse(raw2);
+  }catch(e){ respostas = {}; }
+}
+async function saveProgress(){
+  try{ localStorage.setItem('metodo-indica-progresso', JSON.stringify(progress)); }
+  catch(e){ console.error('Erro ao salvar progresso', e); }
+}
+async function saveRespostas(){
+  try{ localStorage.setItem('metodo-indica-respostas', JSON.stringify(respostas)); }
+  catch(e){ console.error('Erro ao salvar resposta', e); }
+}
+
+function keyFor(audience, lessonId){ return audience + ':' + lessonId; }
+
+function findStartIndex(audience){
+  const list = flatLessons(audience);
+  const idx = list.findIndex(({lesson}) => !progress[keyFor(audience, lesson.id)]);
+  return idx === -1 ? list.length : idx;
+}
+
+function setChromeVisible(visible){
+  document.querySelector('.overall').style.display = visible ? '' : 'none';
+  document.querySelector('.jump-toggle').style.display = visible ? '' : 'none';
+  const jumpList = document.getElementById('jump-list');
+  if(!visible) jumpList.classList.remove('open');
+}
+
+function renderOverall(){
+  const list = flatLessons(currentAudience);
+  const total = list.length;
+  const doneCount = list.filter(({lesson}) => progress[keyFor(currentAudience, lesson.id)]).length;
+  const pct = total ? Math.round((doneCount/total)*100) : 0;
+  document.getElementById('overall-fill').style.width = pct + '%';
+  document.getElementById('overall-pct').textContent = pct + '%';
+  const shownIndex = Math.min(currentFlatIndex + 1, total);
+  document.getElementById('overall-label').textContent = `Aula ${shownIndex} de ${total}`;
+}
+
+function renderCover(){
+  setChromeVisible(false);
+  const wrap = document.getElementById('player-wrap');
+  const list = flatLessons(currentAudience);
+  const total = list.length;
+  const doneCount = list.filter(({lesson}) => progress[keyFor(currentAudience, lesson.id)]).length;
+  const hasProgress = doneCount > 0 && doneCount < total;
+  const audienceLabel = currentAudience === 'vendedores' ? 'Vendedores' : 'Recepção';
+  const d = DATA[currentAudience].hero;
+
+  wrap.innerHTML = `
+    <div class="cover">
+      <span class="cover-eyebrow">Trilha — ${audienceLabel}</span>
+      <h2 class="cover-title">${d.title}</h2>
+      <p class="cover-sub">${d.sub}</p>
+      ${hasProgress ? `<p class="cover-progress-note">Você já concluiu ${doneCount} de ${total} aulas.</p>` : ''}
+      <div class="cover-actions">
+        ${hasProgress
+          ? `<button class="btn-next" id="cover-continue-btn">Continuar de onde parei →</button>
+             <button class="btn-prev cover-restart" id="cover-restart-btn">Recomeçar do início</button>`
+          : `<button class="btn-next" id="cover-start-btn">Começar →</button>`
+        }
+      </div>
+    </div>
+  `;
+
+  if(hasProgress){
+    document.getElementById('cover-continue-btn').addEventListener('click', () => {
+      currentFlatIndex = findStartIndex(currentAudience);
+      showCover = false;
+      renderAll();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+    document.getElementById('cover-restart-btn').addEventListener('click', () => {
+      currentFlatIndex = 0;
+      showCover = false;
+      renderAll();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  } else {
+    document.getElementById('cover-start-btn').addEventListener('click', () => {
+      currentFlatIndex = findStartIndex(currentAudience);
+      showCover = false;
+      renderAll();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  }
+}
+
+function exerciseAnswered(key, exercise){
+  if(exercise.type === 'quiz'){
+    return respostas[key] !== undefined && respostas[key] !== null && respostas[key] !== '';
+  }
+  const val = respostas[key];
+  return typeof val === 'string' && val.trim().length > 0;
+}
+
+function renderPlayer(){
+  setChromeVisible(true);
+  const wrap = document.getElementById('player-wrap');
+  const list = flatLessons(currentAudience);
+
+  if(currentFlatIndex >= list.length){
+    wrap.innerHTML = `
+      <div class="completion">
+        <h3>Trilha concluída 🎉</h3>
+        <p>Você terminou todas as aulas de ${currentAudience === 'vendedores' ? 'Vendedores' : 'Recepção'}. Pode rever qualquer aula na lista abaixo, quando quiser.</p>
+        <button id="restart-btn">Rever do início</button>
+        <button id="cover-btn" class="cover-link-btn">Voltar à capa</button>
+      </div>
+    `;
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      currentFlatIndex = 0;
+      renderAll();
+    });
+    document.getElementById('cover-btn').addEventListener('click', () => {
+      showCover = true;
+      renderAll();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+    renderOverall();
+    return;
+  }
+
+  const { block, lesson } = list[currentFlatIndex];
+  const blockIdx = DATA[currentAudience].blocks.findIndex(b => b.id === block.id);
+  const lessonIdxInBlock = block.lessons.findIndex(l => l.id === lesson.id);
+  const key = keyFor(currentAudience, lesson.id);
+  const exercise = lesson.exercise;
+  const isQuiz = exercise.type === 'quiz';
+  const savedAnswer = respostas[key];
+
+  let exerciseHtml = '';
+  if(isQuiz){
+    const answered = savedAnswer !== undefined && savedAnswer !== null && savedAnswer !== '';
+    exerciseHtml = `
+      <div class="exercise">
+        <p class="exercise-label">Exercício prático</p>
+        <p class="exercise-prompt">${exercise.prompt}</p>
+        <div class="quiz-options" id="quiz-options">
+          ${exercise.options.map((opt, i) => {
+            let cls = 'quiz-option';
+            if(answered){
+              if(i === exercise.correct) cls += ' correct-reveal';
+              if(i === savedAnswer && i !== exercise.correct) cls += ' incorrect-reveal';
+            }
+            return `<button class="${cls}" data-idx="${i}" ${answered ? 'disabled' : ''}>${opt}</button>`;
+          }).join('')}
+        </div>
+        <p class="quiz-feedback" id="quiz-feedback" style="display:${answered ? 'block' : 'none'}">${answered ? exercise.explanation : ''}</p>
+      </div>
+    `;
+  } else {
+    const savedText = typeof savedAnswer === 'string' ? savedAnswer : '';
+    exerciseHtml = `
+      <div class="exercise">
+        <p class="exercise-label">Exercício</p>
+        <p class="exercise-prompt">${exercise.prompt}</p>
+        <textarea class="exercise-input" placeholder="Escreva sua resposta aqui...">${savedText}</textarea>
+        <span class="exercise-status ${savedText ? 'saved' : ''}">${savedText ? 'Salvo' : ''}</span>
+      </div>
+    `;
+  }
+
+  wrap.innerHTML = `
+    <div class="player">
+      <p class="lesson-eyebrow">Bloco ${blockIdx+1} · ${block.title} — aula ${lessonIdxInBlock+1} de ${block.lessons.length}</p>
+      <h2 class="lesson-title">${lesson.title}</h2>
+      <div class="theory">${lesson.body}</div>
+      ${exerciseHtml}
+      <div class="player-actions">
+        <button class="btn-prev" ${currentFlatIndex === 0 ? 'disabled' : ''}>‹ Anterior</button>
+        <button class="btn-next" id="next-btn">Concluir e continuar →</button>
+      </div>
+      <p class="answer-hint" id="answer-hint" style="display:none">Responda o exercício pra continuar.</p>
+    </div>
+  `;
+
+  const nextBtn = wrap.querySelector('#next-btn');
+  const hint = wrap.querySelector('#answer-hint');
+
+  function refreshNextState(){
+    const ok = exerciseAnswered(key, exercise);
+    nextBtn.classList.toggle('btn-disabled', !ok);
+  }
+
+  if(isQuiz){
+    wrap.querySelectorAll('.quiz-option').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const idx = parseInt(btn.dataset.idx, 10);
+        respostas[key] = idx;
+        await saveRespostas();
+        renderPlayer();
+      });
+    });
+  } else {
+    const textarea = wrap.querySelector('.exercise-input');
+    const status = wrap.querySelector('.exercise-status');
+    textarea.addEventListener('input', () => {
+      status.textContent = 'Digitando...';
+      status.classList.remove('saved');
+      clearTimeout(saveTimers[key]);
+      saveTimers[key] = setTimeout(async () => {
+        respostas[key] = textarea.value;
+        await saveRespostas();
+        status.textContent = respostas[key] ? 'Salvo' : '';
+        status.classList.toggle('saved', !!respostas[key]);
+        refreshNextState();
+      }, 600);
+      refreshNextState();
+    });
+  }
+
+  wrap.querySelector('.btn-prev').addEventListener('click', () => {
+    if(currentFlatIndex > 0){
+      currentFlatIndex -= 1;
+      renderAll();
+      window.scrollTo({ top:0, behavior:'smooth' });
+    }
+  });
+
+  nextBtn.addEventListener('click', async () => {
+    if(!isQuiz){
+      const textarea = wrap.querySelector('.exercise-input');
+      clearTimeout(saveTimers[key]);
+      respostas[key] = textarea.value;
+      await saveRespostas();
+    }
+    if(!exerciseAnswered(key, exercise)){
+      hint.style.display = 'block';
+      return;
+    }
+    hint.style.display = 'none';
+    progress[key] = true;
+    await saveProgress();
+    currentFlatIndex += 1;
+    renderAll();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+
+  refreshNextState();
+  renderOverall();
+}
+
+function renderJumpList(){
+  const jumpList = document.getElementById('jump-list');
+  const list = flatLessons(currentAudience);
+  let html = '';
+  DATA[currentAudience].blocks.forEach(block => {
+    html += `<div class="jump-block-title">${block.title}</div>`;
+    block.lessons.forEach(lesson => {
+      const flatIdx = list.findIndex(item => item.lesson.id === lesson.id);
+      const key = keyFor(currentAudience, lesson.id);
+      const isDone = !!progress[key];
+      const isCurrent = flatIdx === currentFlatIndex && !showCover;
+      html += `<div class="jump-item ${isCurrent ? 'current' : ''}" data-idx="${flatIdx}">
+        <span class="jump-dot ${isDone ? 'done' : ''}"></span>${lesson.title}
+      </div>`;
+    });
+  });
+  jumpList.innerHTML = html;
+  jumpList.querySelectorAll('.jump-item').forEach(item => {
+    item.addEventListener('click', () => {
+      currentFlatIndex = parseInt(item.dataset.idx, 10);
+      showCover = false;
+      renderAll();
+      jumpList.classList.remove('open');
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  });
+}
+
+function renderAll(){
+  if(showCover){
+    renderCover();
+  } else {
+    renderPlayer();
+  }
+  renderJumpList();
+}
+
+document.getElementById('jump-toggle-btn').addEventListener('click', () => {
+  const jumpList = document.getElementById('jump-list');
+  jumpList.classList.toggle('open');
+  document.getElementById('jump-toggle-btn').textContent =
+    jumpList.classList.contains('open') ? 'Esconder lista' : 'Ver todas as aulas';
+});
+
+document.querySelectorAll('.audience-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.audience-toggle button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentAudience = btn.dataset.audience;
+    showCover = true;
+    document.getElementById('jump-list').classList.remove('open');
+    document.getElementById('jump-toggle-btn').textContent = 'Ver todas as aulas';
+    renderAll();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+});
+
+(async function init(){
+  await loadProgress();
+  renderAll();
+})();
+</script>
+</body>
+</html>
